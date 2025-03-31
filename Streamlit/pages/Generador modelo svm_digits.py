@@ -3,6 +3,7 @@ from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import pickle
+import streamlit as st
 # Removed unused import
 
 
@@ -32,3 +33,12 @@ modelo = {
 # Serializar con pickle
 with open("svm_digits_model.pkl", "wb") as f:
     pickle.dump(modelo, f)
+
+
+    # Calcular la precisión del modelo en el conjunto de prueba
+    accuracy = clf.score(X_test, y_test)
+
+    # Mostrar un mensaje indicando que el modelo ha sido guardado y su precisión
+    st.markdown("### Modelo guardado exitosamente")
+    st.markdown(f"- El modelo SVM ha sido guardado en **'svm_digits_model.pkl'**.")
+    st.markdown(f"- Precisión del modelo en el conjunto de prueba: **{accuracy:.2f}**")
