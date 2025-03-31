@@ -8,19 +8,19 @@ import numpy as np
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 
-# 1. Cargar el dataset de dígitos (8x8 imágenes)
+# Cargar el dataset
 digits = load_digits()
-X = digits.data           # Datos: (n_samples, 64)
-y = digits.target         # Etiquetas: (n_samples,)
+X = digits.data
+y = digits.target
 
-# 2. Escalar los datos
+# Escalar los datos
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# 3. Dividir en entrenamiento y prueba
+# Dividir en entrenamiento y prueba
 X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-# 4. Crear y entrenar el modelo SVM
+# Entrenar el modelo SVM
 clf = SVC(kernel="linear")
 clf.fit(X_train, y_train)
 
@@ -29,10 +29,17 @@ modelo = {"scaler": scaler, "clf": clf}
 with open("svm_digits_model.pkl", "wb") as f:
     pickle.dump(modelo, f)
 
-# Calcular la precisión
+# Cargar el modelo
+with open("svm_digits_model.pkl", "rb") as f:
+    modelo = pickle.load(f)
+
+scaler = modelo["scaler"]
+clf = modelo["clf"]
+
+# Precisión del modelo
 accuracy = clf.score(X_test, y_test) * 100
 
-# Estilos CSS corregidos
+# CSS para mejorar el diseño
 st.markdown("""
     <style>
         .main-title {
@@ -58,15 +65,16 @@ st.markdown("""
             font-weight: bold;
             text-align: center;
             padding: 1rem;
-            margin: 1rem 0;
+            margin: 1rem auto;
             border-radius: 8px;
             background-color: #E8F5E9;
             border: 2px solid #4CAF50;
+            width: 60%;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Título principal
+# Título
 st.markdown("<h1 class='main-title'>🔍 Reconocimiento de Dígitos</h1>", unsafe_allow_html=True)
 
 # Tarjeta informativa
@@ -77,20 +85,16 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Cargar el modelo desde el archivo
-with open("svm_digits_model.pkl", "rb") as f:
-    modelo = pickle.load(f)
-
-scaler = modelo["scaler"]
-clf = modelo["clf"]
-
-# Crear dos columnas para las opciones de entrada
+# Crear columnas para entrada
 col1, col2 = st.columns(2)
+prediccion = None
 
 # --------------- Opción 1: Dibujar en el lienzo -----------------
 with col1:
     st.subheader("✏️ Dibuja un Dígito")
-    
+
+    # Canvas centrado en su columna
+    st.markdown("<div style='display:flex; justify-content:center;'>", unsafe_allow_html=True)
     canvas = st_canvas(
         fill_color="rgb(0, 0, 0)",
         stroke_width=20,
@@ -101,51 +105,38 @@ with col1:
         drawing_mode="freedraw",
         key="canvas",
     )
-    
+    st.markdown("</div>", unsafe_allow_html=True)
+
     if st.button("Predecir desde Lienzo", key="predict_canvas"):
         if canvas.image_data is not None:
             def preprocesar_canvas(image_data):
-                imagen = Image.fromarray(image_data.astype("uint8"))
-                imagen = imagen.convert("L")
-                imagen = imagen.resize((8, 8))
-                imagen_array = np.array(imagen)
-                imagen_array = 16 * (imagen_array / 255)  # Escalar a [0, 16]
+                imagen = Image.fromarray(image_data.astype("uint8")).convert("L").resize((8, 8))
+                imagen_array = 16 * (np.array(imagen) / 255)  # Escalar a [0, 16]
                 imagen_array = imagen_array.flatten().reshape(1, -1)
-                imagen_array = scaler.transform(imagen_array)
-                return imagen_array
-            
+                return scaler.transform(imagen_array)
+
             img_processed = preprocesar_canvas(canvas.image_data)
-            prediction = clf.predict(img_processed)
-            
-            st.markdown(f"<div class='prediction-result'>El modelo predice: **{prediction[0]}**</div>", unsafe_allow_html=True)
+            prediccion = clf.predict(img_processed)[0]
 
 # --------------- Opción 2: Subir una imagen -----------------
 with col2:
     st.subheader("📷 Sube una Imagen")
-    
     archivo_subido = st.file_uploader("Selecciona una imagen", type=["jpg", "png"])
-    
+
     if archivo_subido is not None:
         image = Image.open(archivo_subido)
         st.image(image, caption="Imagen subida", width=200)
-        
+
         def preprocess_image(image):
-            image = image.convert("L")
-            image = image.resize((8, 8))
-            image_array = np.array(image)
-            image_array = 16 * (image_array / 255)  # Escalar a [0, 16]
-            image_array = image_array.flatten().reshape(1, -1)
-            image_array = scaler.transform(image_array)
-            return image_array
-        
-        def predict(image):
-            image_array = preprocess_image(image)
-            prediccion = clf.predict(image_array)
-            return prediccion[0]
-        
-        prediction = predict(image)
-        
-        st.markdown(f"<div class='prediction-result'>El modelo predice: **{prediction}**</div>", unsafe_allow_html=True)
+            image = image.convert("L").resize((8, 8))
+            image_array = 16 * (np.array(image) / 255)  # Escalar a [0, 16]
+            return scaler.transform(image_array.flatten().reshape(1, -1))
+
+        prediccion = clf.predict(preprocess_image(image))[0]
+
+# --------------- Mostrar predicción debajo de ambas columnas -----------------
+if prediccion is not None:
+    st.markdown(f"<div class='prediction-result'>El modelo predice: **{prediccion}**</div>", unsafe_allow_html=True)
 
 # Información del modelo
 st.markdown("""
@@ -163,6 +154,6 @@ st.markdown("""
 # Pie de página
 st.markdown("""
     <div style="margin-top: 3rem; text-align: center; color: #9E9E9E; font-size: 0.9rem;">
-        Aplicación desarrollada con Streamlit, OpenCV y Scikit-learn.
+        Aplicación desarrollada con Streamlit y Scikit-learn.
     </div>
 """, unsafe_allow_html=True)
