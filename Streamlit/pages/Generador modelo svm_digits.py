@@ -36,9 +36,9 @@ with open("svm_digits_model.pkl", "wb") as f:
 
 
     # Calcular la precisión del modelo en el conjunto de prueba
-    accuracy = clf.score(X_test, y_test)
+    accuracy = clf.score(X_test, y_test) * 100
 
     # Mostrar un mensaje indicando que el modelo ha sido guardado y su precisión
-    st.markdown("### Modelo guardado exitosamente")
-    st.markdown(f"- El modelo SVM ha sido guardado en **'svm_digits_model.pkl'**.")
-    st.markdown(f"- Precisión del modelo en el conjunto de prueba: **{accuracy:.2f}**")
+    st.markdown("### 🎉 **Modelo guardado exitosamente** 🎉")
+    st.markdown(f"<span style='color:green; font-size:18px;'>✔️ El modelo SVM ha sido guardado en <b>'svm_digits_model.pkl'</b>.</span>", unsafe_allow_html=True)
+    st.markdown(f"<span style='color:blue; font-size:18px;'>📊 Precisión del modelo en el conjunto de prueba: <b>{accuracy:.2f}%</b>.</span>", unsafe_allow_html=True)
