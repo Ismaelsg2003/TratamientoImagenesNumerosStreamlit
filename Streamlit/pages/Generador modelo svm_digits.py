@@ -59,12 +59,13 @@ st.markdown("""
     .metric-value {
         font-size: 1.8rem;
         font-weight: bold;
-        color: #2196F3;
+        color: #0D47A1;  /* Color más oscuro para mejor contraste */
         text-align: center;
     }
     .metric-label {
         font-size: 1rem;
-        color: #616161;
+        font-weight: 500;  /* Texto más grueso */
+        color: #1565C0;  /* Color más oscuro para mejor contraste */
         text-align: center;
     }
     .footer {

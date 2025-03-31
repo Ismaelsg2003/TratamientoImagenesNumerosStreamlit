@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
+# Removed unused import
 
 
 # 1. Cargar el dataset de dígitos (8x8 imágenes)
@@ -59,6 +60,8 @@ st.markdown("""
         padding: 1rem;
         margin: 1rem 0;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        color: #0D47A1;  /* Añadir color de texto más oscuro */
+        font-weight: 500;  /* Hacer el texto un poco más grueso */
     }
     .section-title {
         color: #0D47A1;
@@ -95,14 +98,14 @@ st.markdown("""
     }
     .stButton>button {
         background-color: #1976D2;
-        color: white;
+        color: white !important;  /* Forzar color blanco */
         font-weight: bold;
         padding: 0.5rem 2rem;
         border-radius: 5px;
         border: none;
     }
     .stButton>button:hover {
-        background-color: #1565C0;
+        background-color: #1976D2;  /* Mismo color que el normal para eliminar el efecto hover */
     }
 </style>
 """, unsafe_allow_html=True)
