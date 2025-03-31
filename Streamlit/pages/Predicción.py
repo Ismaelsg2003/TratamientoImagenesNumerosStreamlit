@@ -136,7 +136,7 @@ with col2:
 
 # --------------- Mostrar predicción debajo de ambas columnas -----------------
 if prediccion is not None:
-    st.markdown(f"<div class='prediction-result'>El modelo predice: **{prediccion}**</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='prediction-result'>El modelo predice: <b>{prediccion}</b></div>", unsafe_allow_html=True)
 
 # Información del modelo
 st.markdown("""
